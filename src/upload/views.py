@@ -3,7 +3,7 @@ from django.contrib import messages
 from . import models
 from store.models import Store
 from django.conf import settings
-import os, csv
+import os
 # Create your views here.
 
 def upload_csv(request):
