@@ -15,6 +15,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 ON_RAILWAY = config('ON_RAILWAY', default=False, cast=bool)
+ON_CODESPACE = config('ON_CODESPACE', default=False, cast=bool)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -51,11 +52,13 @@ INSTALLED_APPS = [
 
     # my-app
     'customcommand',
+    'upload',
+    'store',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',# whitenoise
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',# whitenoise
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -63,6 +66,19 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+#check if using codespace
+if ON_CODESPACE:
+    codespace_name = config("CODESPACE_NAME")
+    codespace_domain = config("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")
+    CSRF_TRUSTED_ORIGINS = [f'https://{codespace_name}-8000.{codespace_domain}', 'https://localhost:8000']
+    INSTALLED_APPS += [
+        'django_browser_reload',
+    ]
+    MIDDLEWARE += [
+        'django_browser_reload.middleware.BrowserReloadMiddleware',
+    ]
+    X_FRAME_OPTIONS = 'ALLOW-FROM preview.app.github.dev'
 
 ROOT_URLCONF = 'arvhome.urls'
 
@@ -152,6 +168,9 @@ STATICFILES_BASE_DIR.mkdir(exist_ok=True, parents=True)
 
 STATICFILES_VENDOR_DIR = STATICFILES_BASE_DIR / 'vendors'
 
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # source (s) for python manage.py collectstatic
 STATICFILES_DIRS = [
     STATICFILES_BASE_DIR
@@ -162,11 +181,11 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / 'local-cdn'
 
 # Whitenoise compression support
-STORAGES = {
-    'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
-    },
-}
+# STORAGES = {
+#     'staticfiles': {
+#         'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+#     },
+# }
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
