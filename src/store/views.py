@@ -9,11 +9,9 @@ def add_store(request):
     html_template = 'add-store.html'
 
     if request.method == 'POST':
-        print('Post detected')
         form = models.storeForm(request.POST)
         if form.is_valid():
             form.save()
-            print('Save success')
             return HttpResponseRedirect(reverse('store_list'))
 
     context = {

@@ -12,6 +12,7 @@ def upload_csv(request):
     if request.method == 'POST':
         stores = []
         form = models.uploadCSVForm(request.POST, request.FILES)
+
         if form.is_valid():
             csv_file = request.FILES['file']
             file_path = os.path.join(settings.MEDIA_ROOT, 'csv_files', csv_file.name)
@@ -19,13 +20,14 @@ def upload_csv(request):
                 for chunk in csv_file.chunks():
                     destination.write(chunk)
             
-            with open(file_path, 'r') as f:
-                reader = csv.reader(f)
-                next(reader)  # Skip the header row
-                for row in reader:
-                    code, brand, state, name = row
-                    stores.append({'code': str(code), 'brand': str(brand), 'state': str(state), 'name': str(name)})
-                    Store.objects.create(code=code, name=name, state=state, brand=brand)
+            # with open(file_path, 'r') as f:
+            #     reader = csv.reader(f)
+            #     next(reader)  # Skip the header row
+            #     for row in reader:
+            #         print(f'{row}')
+            #         code, state = row
+            #         stores.append({'code': str(code), 'state': str(state)})
+            #         Store.objects.create(code=code, state=state)
 
             msg = messages.success(request, 'File uploaded and data saved successfully!')
             context = {
@@ -36,6 +38,9 @@ def upload_csv(request):
                 'msg':msg
             }
             return render(request, html_template, context)
+        else:
+            print(f'Not valid')
+            return render(request, html_template)
     
     else:
         form = models.uploadCSVForm()
