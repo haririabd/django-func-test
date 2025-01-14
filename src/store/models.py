@@ -7,6 +7,16 @@ class State(models.Model):
 
     def __str__(self):
         return self.name.capitalize()
+
+class stateForm(forms.ModelForm):
+    class Meta:
+        model = State
+        fields = ['name']
+        widgets = {
+           'name': forms.TextInput(attrs={
+               'class': "form-control"
+           })
+        }
     
 class Store(models.Model):
     code = models.CharField(max_length=50)
