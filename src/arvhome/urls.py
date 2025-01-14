@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from . import views
-from store.views import add_store, store_list
+from store.views import add_store, store_list, add_state
 from upload.views import upload_csv
 from django.conf import settings
 
@@ -28,6 +28,7 @@ urlpatterns = [
     # application path is below
     path('', views.index_view, name='index'),
     path('add-store/', add_store, name='add_store'),
+    path('add-state/', add_state, name='add_state'),
     path('stores/', store_list, name='store_list'),
     path('csv/', upload_csv, name='upload_csv')
 ]

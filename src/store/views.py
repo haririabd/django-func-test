@@ -3,6 +3,23 @@ from django.urls import reverse
 from . import models
 
 # Create your views here.
+def add_state(request):
+    form = models.stateForm()
+    page_title = 'Add State'
+    html_template = 'add-state.html'
+
+    if request.method == 'POST':
+        form = models.stateForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('add_store'))
+
+    context = {
+        'page_title': page_title,
+        'form': form
+        }
+    return render(request, html_template, context)
+
 def add_store(request):
     form = models.storeForm()
     page_title = 'Add Store'
