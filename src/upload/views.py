@@ -1,26 +1,23 @@
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponseRedirect
+from django.urls import reverse
 from django.contrib import messages
 from . import models
 from store.models import Store
 from django.conf import settings
-import os
+import csv
+from .csv_upload import upload_file
 # Create your views here.
 
 def upload_csv(request):
-    html_template = 'csv-result.html'
-    page_title = 'Upload CSV'
     if request.method == 'POST':
-        stores = []
         form = models.uploadCSVForm(request.POST, request.FILES)
 
         if form.is_valid():
             csv_file = request.FILES['file']
-            file_path = os.path.join(settings.MEDIA_ROOT, 'csv_files', csv_file.name)
-            with open(file_path, 'wb+') as destination:
-                for chunk in csv_file.chunks():
-                    destination.write(chunk)
+            file_path = upload_file(csv_file)  # Call the upload_file function
             
             # with open(file_path, 'r') as f:
+            #     stores = []
             #     reader = csv.reader(f)
             #     next(reader)  # Skip the header row
             #     for row in reader:
@@ -29,23 +26,53 @@ def upload_csv(request):
             #         stores.append({'code': str(code), 'state': str(state)})
             #         Store.objects.create(code=code, state=state)
 
-            msg = messages.success(request, 'File uploaded and data saved successfully!')
-            context = {
-                'page_title': page_title,
-                'form': form,
-                'stores': stores,
-                'total': len(stores),
-                'msg':msg
-            }
-            return render(request, html_template, context)
+            messages = messages.success(request, 'File uploaded and data saved successfully!')
+            return(request, messages, file_path)
         else:
-            print(f'Not valid')
-            return render(request, html_template)
+            form = models.uploadCSVForm()
+            context = {
+                'form': form
+            }
+            return(request, context)
     
     else:
         form = models.uploadCSVForm()
         context = {
             'form': form,
-            'page_title': page_title
+        }
+        return render(request, 'upload-csv.html', context)
+    
+def add_store_csv(request):
+    if request.method == 'POST':
+        form = models.uploadCSVForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            csv_file = request.FILES['file']
+            file_path = upload_file(csv_file)  # Call the upload_file function
+            
+            with open(file_path, 'r') as f:
+                stores = []
+                reader = csv.reader(f)
+                next(reader)  # Skip the header row
+                for row in reader:
+                    code, state = row
+                    stores.append({'code': str(code), 'state': str(state)})
+
+            m = messages.success(request, 'File uploaded successfully!')
+            context = {
+                'stores': stores
+            }
+            return render(request, 'store-list.html', context)
+        else:
+            form = models.uploadCSVForm()
+            context = {
+                'form': form
+            }
+            return(request, context)
+    
+    else:
+        form = models.uploadCSVForm()
+        context = {
+            'form': form,
         }
         return render(request, 'upload-csv.html', context)
